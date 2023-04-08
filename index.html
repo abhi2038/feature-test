@@ -1,46 +1,364 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <title>PC Booking</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+<style>
 
-  </head>
-  <body>
-    <h1>PC Booking</h1>
-    <form id="bookingForm">
-      <label for="nameInput">Name:</label>
-      <input type="text" id="nameInput" required><br>
-      <label for="emailInput">Email:</label>
-      <input type="email" id="emailInput" required><br>
-      <label for="pcSelect">Select a PC:</label>
-      <select id="pcSelect">
-        <option value="pc1">PC 1</option>
-        <option value="pc2">PC 2</option>
-        <option value="pc3">PC 3</option>
-      </select><br>
-      <label for="timeSelect">Select duration:</label>
-      <select id="timeSelect">
-        <option value="1">1 hour</option>
-        <option value="2">2 hours</option>
-        <option value="3">3 hours</option>
-        <option value="4">4 hours</option>
-      </select><br>
-      <label for="paymentInput">Payment amount:</label>
-      <input type="number" id="paymentInput" min="0" step="0.01" required><br>
-      <button type="submit">Book PC</button>
-    </form>
-    <h2>Booked PCs</h2>
-    <table id="bookingDetails">
-      <thead>
-        <tr>
-          <th>PC</th>
-          <th>Duration</th>
-          <th>Payment</th>
-          <th>Time Remaining</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f1f1f1;
+    margin: 0;
+    padding: 0;
+  }
+
+  form {
+    width: 400px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  input[type="text"],
+  input[type="tel"],
+  input[type="number"],
+  select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 3px;
+    background-color: #f5f5f5;
+    font-size: 16px;
+    color: #333;
+  }
+
+  input[type="submit"] {
+    background-color: #008CBA;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  input[type="submit"]:hover {
+    background-color: #0073aa;
+  }
+
+  .booked-pc {
+    width: 400px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+  }
+
+  .booked-pc h2 {
+    margin-top: 0;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .timer {
+    font-size: 40px;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+
+  .pc-count {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+  font-size: 24px;
+  font-weight: bold;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+
+</style>
+<body>
+<form>
+  <label for="name">Name:</label>
+  <input type="text" id="name" name="name">
+
+  <label for="phone">Phone Number:</label>
+  <input type="tel" id="phone" name="phone">
+
+  <label for="pc-number">PC Number:</label>
+  <input type="number" id="pc-number" name="pc-number">
+
+  <label for="time">Time (in hours):</label>
+  <input type="number" id="time" name="time">
+
+  <label for="time-frame">Time Frame</label>
+  <select id="tframe" name="tframe">
+    <option value="half">Half hour</option>
+    <option value="one">One</option>
+  
+  </select>
+  <label for="appt">Select a time:</label>
+  <input type="time" id="tme" name="tme">
+
+
+  <label for="payment">Method of Payment:</label>
+  <select id="payment" name="payment">
+    <option value="online">Online</option>
+    <option value="cash">Cash</option>
+    <option value="hold">Hold</option>
+  </select>
+
+  <input type="submit" value="Book Now">
+
+</form>
+<div class="booked-pc" id="booked-pc" style="display: none;">
+   
+  <h2>PC <span id="pc-number-display"></span> is booked!</h2>
+  <p>You have <span class="timer" id="timer"></span> hours to play.</p>
+</div>
+
+
+
+<div class="box">
+    <h2>LOCAL STORAGE DETAILS</h2>
+    <table>
+        <thead>
+            <tr>
+                
+                <th>PC number</th>
+                <th> NAME<th></th>
+                <th>time</th>
+              
+                <th>payment method</th>
+
+               
+            </tr>
+        </thead>
+        <tbody id="bookingDetails">
+        </tbody>
     </table>
-    <script src="pc-booking.js"></script>
-  </body>
+</div>
+   
+
+<div class="box">
+    <h2>PC Count</h2>
+    <div id="pcCount" class="pc-count"></div>
+    
+</div>
+
+
+<div id="myBlock" class="booked-pc">...</div>
+
+
+    
+
+
+
+
+<script>
+
+  const form = document.querySelector('form');
+  const bookedPc = document.getElementById('booked-pc');
+  const pcNumberDisplay = document.getElementById('pc-number-display');
+  const timerDisplay = document.getElementById('timer');
+  let countdown;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const pcNumber = document.getElementById('pc-number').value;
+    const time = document.getElementById('time').value;
+    const payment = document.getElementById('payment').value;
+    const tframe = document.getElementById('tframe').value;
+
+    console.log()
+
+
+    // Check if the PC is already booked
+    if (localStorage.getItem(`pc${pcNumber}`) !== null) {
+      alert(`PC ${pcNumber} is already booked. Please choose another PC.`);
+      return;
+    }
+
+    // Save the booking details to localStorage
+    const bookingDetails = {
+      name,
+      phone,
+      time,
+      payment
+    };
+    localStorage.setItem(`pc${pcNumber}`, JSON.stringify(bookingDetails));
+
+
+    
+
+const storageDetails = document.getElementById("bookingDetails");
+storageDetails.innerHTML = "";
+
+
+
+for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    const value = localStorage.getItem(key);
+    const object = JSON.parse(value);
+    console.log(object);
+    console.log(i);
+  
+
+    // displaying value from local storage
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td>${key}</td>
+        <td>${object.name}</td>
+        <td>${object.time} hr </td>  
+        <td>${object.payment}</td>
+
+       
+    `;
+    storageDetails.appendChild(row);
+}
+
+
+
+// Get the pcCount element
+const pcCount = document.getElementById('pcCount');
+
+// Count the number of PCs that have been booked
+const count = localStorage.length;
+
+// Update the pcCount element with the count
+pcCount.innerHTML = `Number of PCs booked: ${count}`;
+
+for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+
+
+    pcNumber.innerHTML = `${key}`;
+    
+}
+
+
+
+
+
+
+    // Hide the form and show the booked PC details
+    form.style.display = 'none';
+    bookedPc.style.display = 'block';
+    pcNumberDisplay.textContent = pcNumber;
+
+    // Start the countdown timer
+    let timeRemaining = time * 60 * 60; // convert hours to seconds
+    
+    bookedPc.style.backgroundColor = 'red';
+
+    displayTimeRemaining(timeRemaining);
+    
+    countdown = setInterval(() => {
+      console.log(timeRemaining)  
+      timeRemaining--;
+      displayTimeRemaining(timeRemaining);
+      bookedPc.style.backgroundColor = timeRemaining >= 3590 ? "green":"white";
+    
+      if (timeRemaining === 0) {
+        clearInterval(countdown);
+        alert(`Your time on PC ${pcNumber} has ended.`);
+        localStorage.removeItem(`pc${pcNumber}`);
+        bookedPc.style.display = 'none';
+        form.style.display = 'block';
+      }
+    
+    
+      
+    }, 1000);
+    
+  });
+
+
+
+
+//   for (let i = 0; i < localStorage.length; i++) {
+//     const key = localStorage.key(i);
+// 	const value = localStorage.getItem(key);
+//   const valueString = localStorage.getItem(value);
+  
+//   console.log(valueString);
+// const valueObject = JSON.parse(valueString);
+
+// let occupiedCount = 0;
+
+// for (const [key, value] of Object.entries(valueObject)) {
+//   if (value === "occupied") {
+//     occupiedCount++;
+//   }
+// }
+  
+
+// const countDiv = document.querySelector(".box-test .count");
+// countDiv.textContent = occupiedCount;
+//   }
+
+  function displayTimeRemaining(timeRemaining) {
+    const hours = Math.floor(timeRemaining / 3600);
+    const minutes = Math.floor((timeRemaining % 3600) / 60);
+    const seconds = timeRemaining % 60;
+    
+    timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+  function writeBookingToSheet(pc, start, end, duration) {
+  try {
+    var sheet = SpreadsheetApp.openById('1RmC0jjdcMfkkkoU0oVKcEE8bvJ6Upb7iTb7nYEIM1Vk').getSheetByName('Bookings');
+    var lastRow = sheet.getLastRow();
+    var range = sheet.getRange(lastRow + 1, 1, 1, 4);
+    range.setValues([[pc, start, end, duration]]);
+    Logger.log('Booking added to sheet:', pc, start, end, duration);
+  } catch (error) {
+    Logger.log('Error adding booking to sheet:', error);
+  }
+}
+$.ajax({
+  url: "https://script.google.com/macros/s/AKfycbyvGcWxRfgEynjH9hMkF1q3W2zDWc6UUVps6dDu3Vq3/exec",
+  data: data,
+  success: function (response) {
+    // Show success message
+    $('#booking-form .alert-success').removeClass('d-none');
+    $('#booking-form .alert-danger').addClass('d-none');
+    
+    // Disable submit button
+    $('#booking-form button[type="submit"]').prop('disabled', true);
+    
+    // Clear form inputs
+    $('#booking-form input[name="name"]').val('');
+    $('#booking-form input[name="email"]').val('');
+    $('#booking-form input[name="phone"]').val('');
+    $('#booking-form input[name="start"]').val('');
+    $('#booking-form input[name="end"]').val('');
+    
+    // Write booking to sheet
+    writeBookingToSheet(data.pc, data.start, data.end, data.duration);
+  },
+  error: function (error) {
+    // Show error message
+    $('#booking-form .alert-danger').removeClass('d-none');
+    $('#booking-form .alert-success').addClass('d-none');
+  }
+});
+
+
+</script>
+
+</body>
 </html>
