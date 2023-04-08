@@ -8,7 +8,6 @@ const nameInput = document.getElementById('name');
 const timeInput = document.getElementById('time');
 const paymentInput = document.getElementById('payment');
 const submitButton = document.getElementById('submit');
-const totalPCs = 10; // Assuming there are 10 PCs available for booking
 
 // Function to display booking details
 function displayBookingDetails() {
@@ -74,39 +73,45 @@ setInterval(displayBookingDetails, 10000);
 
 // Function to handle form submission
 function handleFormSubmit(event) {
-    event.preventDefault();
-  
-    // Get form values
-    const name = nameInput.value;
-    const time = parseInt(timeInput.value);
-    const payment = paymentInput.value;
-  
-    // Find the first available PC and book it
-    let pcNumber = null;
-    for (let i = 1; i <= 10; i++) {
-      if (localStorage.getItem('pc' + i) === null) {
-        pcNumber = i;
-        break;
-      }
+  event.preventDefault();
+
+  // Get form values
+  const name = nameInput.value;
+  const time = parseInt(timeInput.value);
+  const payment = paymentInput.value;
+
+  // Find the first available PC and book it
+  let pcNumber = null;
+  for (let i = 1; i <= 10; i++) {
+    if (localStorage.getItem('pc' + i) === null) {
+      pcNumber = i;
+      break;
     }
-  
-    if (pcNumber) {
-      // Set booking details in local storage
-      const timestamp = new Date();
-      const bookingDetails = {
-        timestamp: timestamp.toISOString(),
-        time: time,
-        payment: payment
-      };
-      localStorage.setItem(`pc${pcNumber}`, JSON.stringify(bookingDetails));
-    }
-  
-    // Clear form inputs
-    nameInput.value = '';
-    timeInput.value = '';
-    paymentInput.value = '';
-  
-    // Update booking details display
-    displayBookingDetails();
   }
-  
+
+  if (pcNumber !== null) {
+    // Store booking details in local storage
+    const timestamp = new Date();
+    const bookingDetails = {
+     
+    name: name,
+    time: time,
+    payment: payment,
+    timestamp: timestamp.toISOString()
+  };
+  localStorage.setItem(`pc${pcNumber}`, JSON.stringify(bookingDetails));
+
+  // Clear form inputs
+  nameInput.value = '';
+  timeInput.value = '';
+  paymentInput.value = '';
+
+  // Display success message
+  alert(`You have successfully booked PC number ${pcNumber}.`);
+
+  // Update booking details table
+  displayBookingDetails();
+} else {
+  alert('Sorry, all PCs are currently booked. Please try again later.');
+}
+}
